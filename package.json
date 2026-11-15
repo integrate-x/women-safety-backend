@@ -1,0 +1,17 @@
+{
+  "name": "women-safety-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Express backend and dashboard for an ESP32 GPS-based women's safety prototype",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "dotenv": "^17.0.0",
+    "express": "^5.0.0"
+  }
+}
