@@ -73,11 +73,6 @@ app.post("/api/reset", authenticate, (req, res) => {
   res.json({ success: true, message: "Alert reset" });
 });
 
-app.get("*", (req, res, next) => {
-  if (req.path.startsWith("/api/")) return next();
-  res.sendFile(path.join(__dirname, "public", "index.html"));
-});
-
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ success: false, message: "Internal server error" });
