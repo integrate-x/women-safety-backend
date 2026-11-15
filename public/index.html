@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#772432">
+  <title>Women's Safety Emergency Dashboard</title>
+  <style>
+    :root { font-family: Arial, Helvetica, sans-serif; color: #18212b; background: #f3f5f7; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 28px 16px; }
+    main { max-width: 760px; margin: 0 auto; }
+    header { text-align: center; margin-bottom: 24px; }
+    h1 { color: #772432; margin-bottom: 8px; }
+    .subtitle { color: #59636e; margin: 0; }
+    .card { background: #fff; border: 1px solid #e1e5e9; border-radius: 14px; padding: 22px; box-shadow: 0 8px 25px rgba(20,30,40,.06); }
+    .status { padding: 16px; border-radius: 10px; font-weight: 700; text-align: center; background: #dcfce7; color: #166534; }
+    .status.active { background: #fee2e2; color: #991b1b; }
+    .status.error { background: #fef3c7; color: #92400e; }
+    dl { display: grid; grid-template-columns: 150px 1fr; gap: 14px 10px; margin: 24px 0; }
+    dt { color: #59636e; font-weight: 600; }
+    dd { margin: 0; overflow-wrap: anywhere; }
+    a { color: #004165; font-weight: 700; }
+    .muted { color: #68737d; font-size: 13px; margin-top: 18px; line-height: 1.5; }
+    .updated { color: #68737d; font-size: 12px; text-align: right; margin-top: 16px; }
+    @media (max-width: 480px) { dl { grid-template-columns: 1fr; gap: 5px; } dd { margin-bottom: 10px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Women's Safety System</h1>
+      <p class="subtitle">Emergency alert monitoring dashboard</p>
+    </header>
+    <section class="card" aria-live="polite">
+      <div id="status" class="status">Connecting to backend…</div>
+      <dl>
+        <dt>Latitude</dt><dd id="lat">—</dd>
+        <dt>Longitude</dt><dd id="lng">—</dd>
+        <dt>Alert received</dt><dd id="time">—</dd>
+        <dt>Location</dt><dd><a id="map" href="#" target="_blank" rel="noopener noreferrer" hidden>Open in Google Maps</a><span id="no-map">No active location</span></dd>
+      </dl>
+      <p class="muted">This dashboard displays alerts received by the prototype backend. It is a demonstration system, not a replacement for emergency services.</p>
+      <p class="updated" id="updated">Waiting for first update…</p>
+    </section>
+  </main>
+  <script>
+    const el = (id) => document.getElementById(id);
+
+    async function updateDashboard() {
+      try {
+        const response = await fetch("/api/alert", { cache: "no-store" });
+        if (!response.ok) throw new Error("Backend returned HTTP " + response.status);
+        const alert = await response.json();
+
+        if (alert.active) {
+          el("status").textContent = "EMERGENCY ALERT ACTIVE";
+          el("status").className = "status active";
+          el("lat").textContent = Number(alert.latitude).toFixed(6);
+          el("lng").textContent = Number(alert.longitude).toFixed(6);
+          el("time").textContent = alert.timestamp ? new Date(alert.timestamp).toLocaleString() : "Unknown";
+          el("map").href = "https://www.google.com/maps?q=" + encodeURIComponent(alert.latitude + "," + alert.longitude);
+          el("map").hidden = false;
+          el("no-map").hidden = true;
+        } else {
+          el("status").textContent = "SYSTEM NORMAL — NO ACTIVE ALERT";
+          el("status").className = "status";
+          el("lat").textContent = "—";
+          el("lng").textContent = "—";
+          el("time").textContent = "—";
+          el("map").hidden = true;
+          el("no-map").hidden = false;
+        }
+        el("updated").textContent = "Last checked: " + new Date().toLocaleTimeString();
+      } catch (error) {
+        el("status").textContent = "BACKEND CONNECTION FAILED";
+        el("status").className = "status error";
+        el("updated").textContent = error.message;
+      }
+    }
+
+    updateDashboard();
+    setInterval(updateDashboard, 3000);
+  </script>
+</body>
+</html>
